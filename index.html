@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Engineering Toolkit 06 — Testing Frameworks for Simulators</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Geist+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #1c1815;
+            --bg-card: #231e1a;
+            --bg-code: #2b2520;
+            --text-primary: #efe8dc;
+            --text-secondary: #a2978b;
+            --accent: #aabd59;
+            --accent-dim: #aabd5944;
+            --accent-glow: #aabd5933;
+            --border: #3a322b;
+            --font-display: 'Bricolage Grotesque', sans-serif;
+            --font-mono: 'Geist Mono', 'Geist Mono', monospace;
+            --font-body: 'Instrument Sans', sans-serif;
+            --max-width: 900px;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 17px;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ── Header ── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .hero > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .series-label {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 .accent {
+            color: var(--accent);
+        }
+
+        .hero .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 2rem;
+        }
+
+        /* ── Tag Pills ── */
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .tag {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            background: var(--accent-dim);
+            white-space: nowrap;
+        }
+
+        /* ── Pipeline Flow Bar ── */
+        .pipeline {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+            max-width: var(--max-width);
+        }
+
+        .pipeline-step {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            padding: 0.3rem 0.7rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .pipeline-arrow {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        /* ── Slides ── */
+        .slide {
+            min-height: 100vh;
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 4rem 1.5rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .slide-number {
+            font-family: var(--font-display);
+            font-size: 5rem;
+            font-weight: 700;
+            color: var(--accent-dim);
+            position: absolute;
+            top: 2rem;
+            right: 1.5rem;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .slide h2 {
+            font-family: var(--font-display);
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            line-height: 1.25;
+        }
+
+        .slide h3 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .slide p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .slide p strong {
+            color: var(--text-primary);
+        }
+
+        .slide ul, .slide ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .slide li {
+            margin-bottom: 0.4rem;
+        }
+
+        .slide li strong {
+            color: var(--text-primary);
+        }
+
+        /* ── Code Blocks ── */
+        .code-block {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 1.25rem 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent);
+            background: rgba(170,189,89,0.08);
+            padding: 0.4rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .code-block pre {
+            margin: 0;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #dad1c5;
+        }
+
+        /* Syntax highlighting (manual) */
+        .kw { color: #de805a; }
+        .fn { color: #d7bbdf; }
+        .str { color: #bcdbd4; }
+        .cm { color: #a2978b; font-style: italic; }
+        .num { color: #97cdc6; }
+        .type { color: #e3b174; }
+        .dir { color: #de805a; }
+        .mac { color: #e3b174; }
+
+        /* ── Tables ── */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 1.25rem 0;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: var(--bg-code);
+            color: var(--accent);
+            font-weight: 600;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-family: var(--font-display);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(35,30,26,0.5);
+        }
+
+        /* ── Diagrams ── */
+        .diagram-flow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .diagram-box {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .diagram-box.accent {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(170,189,89,0.08);
+        }
+
+        .diagram-box.dim {
+            color: var(--text-secondary);
+            border-color: var(--border);
+        }
+
+        .diagram-arrow {
+            color: var(--accent);
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        /* Vertical flow diagrams */
+        .diagram-vertical {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .diagram-vertical .diagram-arrow {
+            font-size: 1.1rem;
+        }
+
+        /* Nested hierarchy diagram */
+        .hierarchy {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .hierarchy-level {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .hierarchy-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .hierarchy-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+
+        .hierarchy-item {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .hierarchy-item.accent {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(170,189,89,0.08);
+        }
+
+        /* Grid diagram */
+        .diagram-grid {
+            display: grid;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .diagram-grid.cols-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .diagram-grid.cols-3 {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .diagram-panel {
+            padding: 1rem;
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        .diagram-panel.accent-border {
+            border-left: 3px solid var(--accent);
+        }
+
+        .diagram-panel h4 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .diagram-panel p, .diagram-panel ul {
+            font-size: 0.85rem;
+        }
+
+        /* ── Callout Boxes ── */
+        .callout {
+            background: var(--bg-card);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+        }
+
+        .callout p {
+            margin-bottom: 0;
+        }
+
+        .callout .callout-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.3rem;
+        }
+
+        /* ── Tier Visual ── */
+        .tier-visual {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .tier-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .tier-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            min-width: 90px;
+            text-align: right;
+        }
+
+        .tier-fill {
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding: 0 0.75rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            white-space: nowrap;
+            transition: width 0.6s ease;
+        }
+
+        .tier-cost {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            min-width: 70px;
+        }
+
+        /* ── Contents list ── */
+        .contents-list {
+            list-style: none;
+            padding-left: 0;
+            counter-reset: contents;
+        }
+
+        .contents-list li {
+            counter-increment: contents;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .contents-list li:last-child {
+            border-bottom: none;
+        }
+
+        .contents-list li::before {
+            content: counter(contents, decimal-leading-zero);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--accent);
+            min-width: 2rem;
+        }
+
+        .contents-list a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .contents-list a:hover {
+            color: var(--accent);
+        }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            .slide {
+                padding: 3rem 1rem;
+                min-height: auto;
+            }
+
+            .slide-number {
+                font-size: 3rem;
+                top: 1.5rem;
+                right: 1rem;
+            }
+
+            .slide h2 {
+                font-size: 1.5rem;
+            }
+
+            .diagram-grid.cols-2,
+            .diagram-grid.cols-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .pipeline {
+                gap: 0.15rem;
+            }
+
+            .pipeline-step {
+                font-size: 0.6rem;
+                padding: 0.2rem 0.4rem;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            table {
+                font-size: 0.78rem;
+            }
+
+            .tier-label {
+                min-width: 60px;
+                font-size: 0.65rem;
+            }
+
+            .tier-fill {
+                font-size: 0.6rem;
+                height: 26px;
+            }
+        }
+
+        /* ── Interactive controls (added for Local LLM series) ── */
+        .control-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1.25rem 0;
+        }
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .control-row label {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            min-width: 180px;
+        }
+        .control-row input[type="range"] {
+            flex: 1;
+            min-width: 160px;
+            accent-color: var(--accent);
+        }
+        .control-row input[type="number"],
+        .control-row select {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 4px;
+            padding: 0.3rem 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+        .control-row .val {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--accent);
+            min-width: 80px;
+            text-align: right;
+        }
+        .btn {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            padding: 0.4rem 0.9rem;
+            background: var(--accent-dim);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        .btn:hover { background: rgba(170,189,89,0.2); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn.secondary {
+            background: var(--bg-code);
+            color: var(--text-secondary);
+            border-color: var(--border);
+        }
+        .result-box {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 4px;
+            padding: 0.75rem 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            margin-top: 0.75rem;
+        }
+        .result-box .line-label { color: var(--text-secondary); }
+        .result-box .line-val   { color: var(--accent); font-weight: 600; }
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        .metric {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.6rem 0.8rem;
+            text-align: center;
+        }
+        .metric .metric-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .metric .metric-value {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+
+        /* Canvas / SVG containers */
+        .canvas-wrap {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1.25rem 0;
+            overflow-x: auto;
+        }
+        .canvas-wrap canvas,
+        .canvas-wrap svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+
+        /* Small inline badge */
+        .badge {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            padding: 0.1rem 0.45rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            vertical-align: middle;
+            margin-left: 0.3rem;
+        }
+        .badge.ok    { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+        .badge.warn  { border-color: #e3b174; color: #e3b174; background: rgba(227,177,116,0.08); }
+        .badge.bad   { border-color: #de805a; color: #de805a; background: rgba(222,128,90,0.08); }
+
+
+        /* ── LLM Inference Simulators additions ── */
+        .canvas-wrap canvas { image-rendering: auto; display: block; width: 100%; height: auto; }
+        .canvas-wrap svg { max-width: 100%; height: auto; }
+        .ladder { display: grid; gap: 0.4rem; margin: 1.25rem 0; }
+        .ladder-row {
+            display: grid; grid-template-columns: 11rem 1fr 7.5rem; gap: 0.75rem; align-items: center;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px;
+            padding: 0.55rem 0.85rem; font-size: 0.88rem;
+        }
+        .ladder-row .rung { font-family: var(--font-display); font-weight: 600; color: var(--accent); }
+        .ladder-row .speed { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-secondary); text-align: right; }
+        .res-list { list-style: none; padding: 0; margin: 0.75rem 0; }
+        .res-list li { padding: 0.6rem 0; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
+        .res-list li:last-child { border-bottom: none; }
+        .res-list .what { color: var(--text-secondary); display: block; font-size: 0.86rem; margin-top: 0.15rem; }
+        .res-list a { color: var(--accent); text-decoration: none; }
+        .res-list a:hover { text-decoration: underline; }
+        .qa { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; margin: 0.6rem 0; padding: 0.2rem 1rem; }
+        .qa summary { cursor: pointer; padding: 0.6rem 0; font-weight: 600; }
+        .qa p, .qa ul { margin-bottom: 0.75rem; font-size: 0.92rem; }
+        .sim-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.4rem 1.25rem; }
+        .chart-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+        .chart-title { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.3rem; }
+        .slide a { color: var(--accent); }
+        @media (max-width: 640px) {
+            .ladder-row { grid-template-columns: 1fr; gap: 0.2rem; }
+            .ladder-row .speed { text-align: left; }
+        }
+        .concepts { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 6px; padding: 0.75rem 1rem; margin-top: 1.25rem; font-size: 0.88rem; }
+        .concepts p { margin: 0 0 0.4rem; color: var(--text-secondary); }
+        .concepts .chips { display: flex; flex-wrap: wrap; gap: 0.35rem 0.5rem; }
+        .concepts .chips a { border: 1px solid var(--border); border-radius: 999px; padding: 0.1rem 0.6rem; text-decoration: none; font-size: 0.82rem; }
+        .concepts .chips a:hover { border-color: var(--accent); }
+        /* ── Simulation Engineering Toolkit additions ── */
+        .code-header a.src-link { color: var(--text-secondary); text-decoration: none; float: right; }
+        .code-header a.src-link:hover { color: var(--accent); text-decoration: underline; }
+        p.src { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-secondary); margin: -0.75rem 0 1rem; }
+        p.src a { color: var(--text-secondary); }
+        .control-panel select, .control-panel input[type=number] { background: var(--bg-code); color: var(--text-primary); border: 1px solid var(--border); border-radius: 4px; padding: 0.2rem 0.4rem; font-family: var(--font-mono); font-size: 0.8rem; }
+        .mut-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.4rem 1rem; font-size: 0.85rem; }
+        .mut-grid label { display: flex; gap: 0.5rem; align-items: baseline; cursor: pointer; }
+        .mut-list { font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.7; }
+        .mut-list .killed { color: var(--accent); }
+        .mut-list .survived { color: #de805a; }
+        .hero { overflow: hidden; }   /* the 600px glow must not widen the page on phones */
+        .chart-pair > *, .diagram-grid > *, .sim-grid > * { min-width: 0; }   /* let wide code scroll inside its column */
+        .slide p code, .slide li code, .slide td code { overflow-wrap: anywhere; }
+        .control-panel select { max-width: 100%; }
+    </style>
+</head>
+<body>
+
+<header class="hero">
+    <div class="series-label">Simulation Engineering Toolkit &mdash; Presentation 06</div>
+    <h1>Testing Frameworks for <span class="accent">Simulators</span></h1>
+    <p class="subtitle">A test strategy for a simulator and the frameworks that implement it: pytest in depth (fixtures, parametrize, markers, conftest, plugins, xdist), Hypothesis including stateful tests, golden tests and re-blessing, mutation testing, coverage, GoogleTest, cargo test and proptest, cocotb, and putting it all in CI. Every example runs.</p>
+
+    <div class="tags">
+        <span class="tag">pytest</span>
+        <span class="tag">Hypothesis</span>
+        <span class="tag">Golden tests</span>
+        <span class="tag">Mutation testing</span>
+        <span class="tag">GoogleTest</span>
+        <span class="tag">proptest</span>
+        <span class="tag">cocotb</span>
+    </div>
+
+    <div class="pipeline">
+        <span class="pipeline-step">Unit</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">Property</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">Golden</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">Differential</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">Mutation</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">CI</span>
+    </div>
+</header>
+
+<section class="slide" id="slide-00">
+    <div class="slide-number">00</div>
+    <h2>Topics We'll Cover</h2>
+    <ul class="contents-list">
+        <li><a href="#slide-01">A Test Strategy for a Simulator</a></li>
+        <li><a href="#slide-02">pytest I: Fixtures, conftest and Scopes</a></li>
+        <li><a href="#slide-03">pytest II: Parametrize, Markers, Plugins and xdist</a></li>
+        <li><a href="#slide-04">Hypothesis: Properties and Shrinking</a></li>
+        <li><a href="#slide-05">Hypothesis: Stateful Testing</a></li>
+        <li><a href="#slide-06">Golden Tests and Re-Blessing</a></li>
+        <li><a href="#slide-07">Mutation Testing</a></li>
+        <li><a href="#slide-08">Interactive: Mutation Score versus Coverage</a></li>
+        <li><a href="#slide-09">Coverage, and What It Does Not Tell You</a></li>
+        <li><a href="#slide-10">GoogleTest for C++ Models</a></li>
+        <li><a href="#slide-11">cargo test and proptest</a></li>
+        <li><a href="#slide-12">cocotb: Python Testbenches for RTL</a></li>
+        <li><a href="#slide-13">Running It All in CI</a></li>
+        <li><a href="#slide-14">What to Take Away</a></li>
+    </ul>
+    <div class="concepts">
+        <p><strong>Concepts used here, and where they are explained.</strong> Each links to a glossary entry: this <a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#glossary">series glossary</a>, or the glossaries of LLM Inference Simulators and FHE Accelerator Simulators for concepts those series already explain.</p>
+        <div class="chips"><a href="https://brendanjameslynskey.github.io/LLM_Hub_Inference_Simulators/#g-ladder" title="Layers of evidence: unit tests against hand calculations, invariants, analytic checks, behavioural expectations, property-based tests, differential tests and, finally, correlation against measurement.">The verification ladder</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-fixtures" title="Functions that provide what a test needs, requested by naming them as parameters, defined in conftest.py for sharing, and cached per function, module or session.">pytest fixtures and scopes</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-parametrize" title="@pytest.mark.parametrize runs one test body over many inputs; markers label tests (slow, nightly) so -m can select them; a strict xfail records a known limitation.">parametrize and markers</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-xdist" title="A pytest plugin that runs tests in parallel worker processes (-n auto). Tests must be independent: no shared files or global state.">pytest-xdist</a><a href="https://brendanjameslynskey.github.io/LLM_Hub_Inference_Simulators/#g-hypothesis" title="Generate many random configurations and check that invariants hold for all of them; Hypothesis shrinks any failure to a minimal example.">Property-based testing (Hypothesis)</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-shrinking" title="When a property-based test fails, the framework searches for simpler inputs that still fail and reports the simplest it finds, which is usually a readable reproduction of the bug.">Shrinking</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-stateful" title="Hypothesis generates random sequences of operations (rules) and compares the system with a simple model after every step; failures shrink to a minimal sequence.">Stateful property testing</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-golden" title="Store the output of a reference run and fail when today&#x27;s differs; re-bless (rewrite the stored output) deliberately, with the diff reviewed alongside the change that caused it.">Golden tests and re-blessing</a><a href="https://brendanjameslynskey.github.io/LLM_Hub_Inference_Simulators/#g-differential" title="Requiring two independent implementations to agree exactly on the same input: here the fast path against the baseline, and the browser JavaScript against the Python simulator.">Differential testing</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-mutation" title="Make small deliberate bugs (mutants) in the code and run the tests against each: a killed mutant was noticed, a surviving one was not. The mutation score measures how much the tests actually check.">Mutation testing</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-equivalent" title="Mutants that change the code but not its behaviour, so no test can kill them; survivors must be triaged rather than all chased.">Equivalent mutants</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-coverage" title="The fraction of lines, branch outcomes or code regions that the tests execute. Low coverage is a warning; high coverage does not show that results are checked.">Line, branch and region coverage</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-mcdc" title="Modified condition/decision coverage: each condition in a decision must be shown to change the outcome independently. DO-178C requires it for the most critical avionics software.">MC/DC</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-gtest" title="The common C++ test framework: TEST, fixtures with TEST_F, value-parameterised TEST_P, EXPECT_* (continue) and ASSERT_* (stop), death tests.">GoogleTest</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-sanitizers" title="Compiler instrumentation that turns memory errors (AddressSanitizer) and undefined behaviour (UndefinedBehaviorSanitizer) into immediate failures with a stack trace. Build C++ tests with them.">Sanitizers (ASan, UBSan)</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-proptest" title="Rust&#x27;s property-based testing library: strategies generate inputs, failures shrink, and failing seeds are saved in proptest-regressions/ and replayed first.">proptest</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-cocotb" title="A framework for writing RTL testbenches in Python coroutines that drive an HDL simulator (Icarus, Verilator and others), so a Python model can check the hardware.">cocotb</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-funccov" title="Bins describing the situations a testbench must exercise (a wrap-around, a boundary value), counted during the run; an empty bin is a hole in the verification, whatever the code coverage says.">Functional coverage</a><a href="https://brendanjameslynskey.github.io/FHE_Hub_Accelerator_Simulators/#g-ntt" title="The FFT over a finite field Zq. It moves a limb between coefficient and evaluation form in (N/2) log N butterflies, so polynomial multiplication becomes element-wise. Every key switch and rescale runs NTTs.">Number-theoretic transform (NTT)</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-junit" title="The de facto interchange formats for test results and coverage, written by pytest, cargo-nextest, GoogleTest and cocotb, and read by Jenkins and most CI systems.">JUnit XML and Cobertura reports</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-perfgate" title="A CI step that benchmarks the build and fails it if a benchmark is slower than a stored baseline by more than a set margin.">Performance-regression gate</a><a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#g-flaky" title="Tests that pass or fail without a code change. In a deterministic simulator they point to shared state, an unseeded random number or a wall-clock dependency, and should be fixed, not retried.">Flaky tests</a><a href="https://brendanjameslynskey.github.io/LLM_Hub_Inference_Simulators/#g-ci" title="Run tests on every push and sweeps nightly (Jenkins or similar); fail the build if golden metrics drift; track correlation error, coverage, simulator speed and test health as engineering metrics.">CI, golden metrics and engineering metrics</a></div>
+    </div>
+</section>
+
+<section class="slide" id="slide-01">
+    <div class="slide-number">01</div>
+    <h2>A Test Strategy for a Simulator</h2>
+    <p>A simulator's output is a number nobody can check by eye, so its tests carry more weight than usual. <a href="https://brendanjameslynskey.github.io/InfSim_06_Metrics_Hotspots_Validation/#slide-08">LLM Inference Simulators 06</a> introduced the verification ladder; this deck is about the frameworks that implement each rung, and about testing the tests. Every example here runs: the outputs quoted are recorded in <code>snippets/RESULTS.md</code> or in a code repository's <code>examples/results.md</code>.</p>
+    <div class="canvas-wrap">
+        <svg viewBox="0 0 720 270" width="720" height="270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The verification ladder with the framework that implements each rung">
+            <style>
+                .rb { fill: #2b2520; stroke: #aabd59; stroke-width: 1.3; }
+                .rt { fill: #efe8dc; font-family: 'Geist Mono', monospace; font-size: 11px; }
+                .rd { fill: #a2978b; font-family: 'Geist Mono', monospace; font-size: 10px; }
+                .rh { fill: #aabd59; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 600; font-size: 13px; }
+                .rm { fill: #e3b174; font-family: 'Geist Mono', monospace; font-size: 10px; }
+            </style>
+            <text x="10" y="18" class="rh">Each rung catches what the others miss; each has a tool</text>
+            <text x="505" y="18" class="rm">tool</text>
+            <g>
+                <rect x="10" y="30" width="480" height="26" rx="4" class="rb"/><text x="20" y="47" class="rt">Unit: a component against a hand calculation</text><text x="505" y="47" class="rd">pytest, cargo test, GoogleTest</text>
+                <rect x="30" y="62" width="460" height="26" rx="4" class="rb"/><text x="40" y="79" class="rt">Analytic: the engine against queueing theory</text><text x="505" y="79" class="rd">pytest / cargo test</text>
+                <rect x="50" y="94" width="440" height="26" rx="4" class="rb"/><text x="60" y="111" class="rt">Property: invariants over generated inputs</text><text x="505" y="111" class="rd">Hypothesis, proptest</text>
+                <rect x="70" y="126" width="420" height="26" rx="4" class="rb"/><text x="80" y="143" class="rt">Stateful: sequences of operations vs a model</text><text x="505" y="143" class="rd">Hypothesis stateful</text>
+                <rect x="90" y="158" width="400" height="26" rx="4" class="rb"/><text x="100" y="175" class="rt">Golden: today's answers vs blessed ones</text><text x="505" y="175" class="rd">JSON + --bless</text>
+                <rect x="110" y="190" width="380" height="26" rx="4" class="rb"/><text x="120" y="207" class="rt">Differential: two implementations agree</text><text x="505" y="207" class="rd">pytest + PyO3, cocotb</text>
+                <rect x="130" y="222" width="360" height="26" rx="4" class="rb"/><text x="140" y="239" class="rt">Mutation: do the tests notice a bug?</text><text x="505" y="239" class="rd">mutmut, cargo-mutants</text>
+            </g>
+            <text x="10" y="264" class="rd">Above them all: correlation with hardware, a validation question (LLM Inference Simulators 06, slide 08).</text>
+        </svg>
+    </div>
+    <div class="callout">
+        <div class="callout-label">The question to ask of any suite</div>
+        <p>Not "what fraction of lines run?" but "if I put a plausible bug in this model, would a test fail?". Slides 07 to 09 measure exactly that.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-02">
+    <div class="slide-number">02</div>
+    <h2>pytest I: Fixtures, conftest and Scopes</h2>
+    <p>A <strong>fixture</strong> is a function that provides something a test needs; a test asks for it by naming it as a parameter. Fixtures in <code>conftest.py</code> are visible to every test in that directory, with no import.</p>
+    <div class="code-block">
+        <div class="code-header">snippets/t06/pytest_demo/conftest.py <a class="src-link" href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit/blob/main/snippets/t06/pytest_demo/conftest.py">source</a></div>
+        <pre><code><span class="mac">@pytest.fixture</span>(scope=<span class="str">"session"</span>)
+<span class="kw">def</span> <span class="fn">baseline_run</span>():
+    <span class="str">""</span><span class="str">"One 300-request run, built once and shared by every test that asks for it."</span><span class="str">""</span>
+    wl = <span class="fn">poisson_workload</span>(<span class="num">4.0</span>, <span class="num">300</span>, <span class="type">LengthDist</span>(<span class="num">2048</span>, <span class="num">0.5</span>), <span class="type">LengthDist</span>(<span class="num">128</span>, <span class="num">0.5</span>), seed=<span class="num">1</span>)
+    <span class="kw">return</span> <span class="fn">simulate</span>(<span class="type">SimConfig</span>(), wl)
+
+
+<span class="mac">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">small_workload</span>():
+    <span class="str">""</span><span class="str">"A fresh workload per test: simulate() mutates requests, so never share one."</span><span class="str">""</span>
+    <span class="kw">return</span> <span class="fn">poisson_workload</span>(<span class="num">2.0</span>, <span class="num">50</span>, <span class="type">LengthDist</span>(<span class="num">512</span>, <span class="num">0.3</span>), <span class="type">LengthDist</span>(<span class="num">32</span>, <span class="num">0.3</span>), seed=<span class="num">7</span>)</code></pre>
+    </div>
+    <div class="table-wrap"><table>
+        <thead><tr><th>Scope</th><th>Built</th><th>Use for</th></tr></thead>
+        <tbody>
+            <tr><td><code>function</code> (default)</td><td>Once per test</td><td>Anything a test might change: workloads, temporary files</td></tr>
+            <tr><td><code>module</code> / <code>class</code></td><td>Once per file or class</td><td>A model shared by one group of tests</td></tr>
+            <tr><td><code>session</code></td><td>Once per run</td><td>An expensive reference run that tests only read</td></tr>
+        </tbody>
+    </table></div>
+    <ul>
+        <li><strong>Teardown</strong>: write the fixture with <code>yield</code>; code after the <code>yield</code> runs when the scope ends, even if the test failed.</li>
+        <li><strong>Built-in fixtures</strong> do common jobs: <code>tmp_path</code> (a fresh directory), <code>monkeypatch</code> (patch attributes and environment variables), <code>capsys</code> (captured output), <code>request</code> (which test is asking; used by the golden fixture on slide 06).</li>
+        <li><strong>The trap.</strong> <code>simulate()</code> stamps timestamps onto the request objects it is given. A shared workload, or a shallow copy of one (<code>dataclasses.replace</code> still shares each request's list of inter-token latencies), carries one run's results into the next. This bit the Rust_DES_Kernel differential suite (<a href="https://brendanjameslynskey.github.io/SimEng_02_Rust_Python_PyO3/#slide-08">deck 02, slide 08</a>); build a fresh one per test.</li>
+    </ul>
+</section>
+
+<section class="slide" id="slide-03">
+    <div class="slide-number">03</div>
+    <h2>pytest II: Parametrize, Markers, Plugins and xdist</h2>
+    <div class="code-block">
+        <div class="code-header">snippets/t06/pytest_demo/test_sim.py: one body, three configurations; a slow marker; a strict xfail <a class="src-link" href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit/blob/main/snippets/t06/pytest_demo/test_sim.py">source</a></div>
+        <pre><code><span class="mac">@pytest.mark.parametrize</span>(<span class="str">"cfg"</span>, [
+    <span class="type">SimConfig</span>(),
+    <span class="type">SimConfig</span>(mode=<span class="str">"colocated"</span>, n_colocated=<span class="num">2</span>),
+    <span class="type">SimConfig</span>(n_prefill=<span class="num">2</span>, n_decode=<span class="num">2</span>),
+], ids=[<span class="str">"1P1D"</span>, <span class="str">"colocated"</span>, <span class="str">"2P2D"</span>])
+<span class="kw">def</span> <span class="fn">test_kv_is_released</span>(cfg, small_workload):
+    res = <span class="fn">simulate</span>(cfg, small_workload)
+    <span class="kw">assert</span> <span class="fn">all</span>(i.kv_used == <span class="num">0</span> <span class="kw">for</span> i <span class="kw">in</span> res.instances)
+
+
+<span class="mac">@pytest.mark.slow</span>
+<span class="kw">def</span> <span class="fn">test_long_run_is_stable</span>():
+    <span class="kw">from</span> disagg_sim.workload <span class="kw">import</span> <span class="type">LengthDist</span>, poisson_workload
+    wl = <span class="fn">poisson_workload</span>(<span class="num">3.0</span>, <span class="num">3000</span>, <span class="type">LengthDist</span>(<span class="num">2048</span>, <span class="num">0.5</span>), <span class="type">LengthDist</span>(<span class="num">128</span>, <span class="num">0.5</span>), seed=<span class="num">2</span>)
+    m = <span class="fn">summarise</span>(<span class="fn">simulate</span>(<span class="type">SimConfig</span>(fast_forward=<span class="kw">True</span>), wl))
+    <span class="kw">assert</span> m[<span class="str">"throughput"</span>][<span class="str">"slo_attainment"</span>] &gt; <span class="num">0.9</span>
+
+
+<span class="mac">@pytest.mark.xfail</span>(strict=<span class="kw">True</span>, reason=<span class="str">"known optimism: tensor-parallel all-reduce is not modelled"</span>)</code></pre>
+    </div>
+    <div class="chart-pair">
+        <div><div class="code-block">
+        <div class="code-header">pyproject.toml: register markers; quick suite by default <a class="src-link" href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit/blob/main/snippets/t06/pytest_demo/pyproject.toml">source</a></div>
+        <pre><code>[tool.pytest.ini_options]
+markers = [<span class="str">"slow: long runs, excluded from the quick suite (run with -m slow)"</span>]
+addopts = <span class="str">"-ra -q -m 'not slow'"</span>
+xfail_strict = <span class="kw">true</span></code></pre>
+    </div></div>
+        <div class="code-block"><div class="code-header">pytest --collect-only -q (recorded)</div><pre><code>test_sim.py::test_every_request_finishes
+test_sim.py::test_stages_sum_to_end_to_end
+test_sim.py::test_kv_is_released[1P1D]
+test_sim.py::test_kv_is_released[colocated]
+test_sim.py::test_kv_is_released[2P2D]
+test_sim.py::test_long_run_is_stable
+test_sim.py::test_eight_devices_cost_more_than_four_in_communication
+test_sim.py::test_summary_matches_golden</code></pre></div>
+    </div>
+    <ul>
+        <li><strong>Parametrize</strong> multiplies one test across inputs, and readable <code>ids</code> say which case failed.</li>
+        <li><strong>Markers</strong> label tests (<code>slow</code>, <code>gpu</code>, <code>nightly</code>); <code>-m</code> selects them. Register markers so a typo is an error, not a silently unselected test.</li>
+        <li><strong>Strict xfail</strong> documents a known limitation of the model and fails the suite the day someone fixes it without updating the test.</li>
+        <li><strong>Plugins</strong>: <code>pytest-cov</code> (coverage), <code>pytest-xdist</code> (<code>-n auto</code>: tests in parallel processes), Hypothesis's own plugin, <code>--junitxml</code> for CI. Measured on Disaggregated_Inference_Sim's suite:</li>
+    </ul>
+    <div class="table-wrap"><table>
+<thead><tr><th>Run</th><th>Tests</th><th>Wall time (including start-up)</th><th>Speed-up</th></tr></thead>
+<tbody>
+<tr><td><code>pytest</code></td><td>32</td><td>7.4 s</td><td>1.0x</td></tr>
+<tr><td><code>pytest -n auto</code> (8 workers)</td><td>32</td><td>3.5 s</td><td>2.1x</td></tr>
+</tbody></table></div>
+    <p class="src">Source: <a href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit/blob/main/snippets/RESULTS.md">snippets/RESULTS.md</a> in _simeng_build</p>
+    <p>The speed-up is well short of the worker count: start-up costs, and a suite dominated by a few long tests, cap it. xdist pays off most on large suites of independent tests; tests must not share files or global state to run this way.</p>
+</section>
+
+<section class="slide" id="slide-04">
+    <div class="slide-number">04</div>
+    <h2>Hypothesis: Properties and Shrinking</h2>
+    <p>A property-based test states something that must hold for <em>every</em> input and lets <a href="https://hypothesis.readthedocs.io">Hypothesis</a> search for a counterexample. When it finds one, it <strong>shrinks</strong> it: it tries simpler inputs until it has the simplest failing case it can find. Here is a deliberately false claim about the simulator:</p>
+    <div class="code-block">
+        <div class="code-header">snippets/t06/shrinking/test_shrinking.py <a class="src-link" href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit/blob/main/snippets/t06/shrinking/test_shrinking.py">source</a></div>
+        <pre><code><span class="mac">@settings</span>(max_examples=<span class="num">40</span>, deadline=<span class="kw">None</span>, derandomize=<span class="kw">True</span>)
+<span class="mac">@given</span>(rate=st.<span class="fn">floats</span>(<span class="num">0.5</span>, <span class="num">20.0</span>))
+<span class="kw">def</span> <span class="fn">test_ttft_p99_under_one_second_at_any_rate</span>(rate):
+    wl = <span class="fn">poisson_workload</span>(rate, <span class="num">200</span>, <span class="type">LengthDist</span>(<span class="num">2048</span>, <span class="num">0.5</span>), <span class="type">LengthDist</span>(<span class="num">64</span>, <span class="num">0.5</span>), seed=<span class="num">0</span>)
+    m = <span class="fn">summarise</span>(<span class="fn">simulate</span>(<span class="type">SimConfig</span>(fast_forward=<span class="kw">True</span>), wl))
+    <span class="kw">assert</span> m[<span class="str">"latency_s"</span>][<span class="str">"ttft"</span>][<span class="str">"p99"</span>] &lt; <span class="num">1.0</span></code></pre>
+    </div>
+    <div class="table-wrap"><table>
+<thead><tr><th>Property</th><th>Result</th><th>Counterexample after shrinking</th></tr></thead>
+<tbody>
+<tr><td>p99 TTFT &lt; 1 s at any rate in [0.5, 20]</td><td>fails</td><td><code>rate=5.0</code> (p99 TTFT 1.088 s)</td></tr>
+</tbody></table></div>
+    <p class="src">Source: <a href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit/blob/main/snippets/RESULTS.md">snippets/RESULTS.md</a> in _simeng_build</p>
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel"><h4>Writing good properties for a simulator</h4><ul>
+            <li>Conservation: every request finishes or is rejected; tokens out equal tokens requested.</li>
+            <li>Ordering: timestamps never go backwards; stages sum to end-to-end latency.</li>
+            <li>Limits: utilisation &le; 1; power &le; TDP; latency &ge; the analytic minimum.</li>
+            <li>Agreement: two implementations, or a fast path and a slow one, give the same answer.</li>
+        </ul></div>
+        <div class="diagram-panel"><h4>Settings worth knowing</h4><ul>
+            <li><code>max_examples</code>: more search, longer runs; raise it in a nightly job.</li>
+            <li><code>deadline=None</code> for simulations, which are legitimately slow.</li>
+            <li><code>derandomize=True</code> for reproducible CI; or keep the example database, which replays past failures first.</li>
+            <li><code>@example(...)</code> pins a past failure as a permanent regression test.</li>
+        </ul></div>
+    </div>
+</section>
+
+<section class="slide" id="slide-05">
+    <div class="slide-number">05</div>
+    <h2>Hypothesis: Stateful Testing</h2>
+    <p>Some bugs need a <em>sequence</em> of operations to appear. A stateful test describes the operations as rules; Hypothesis generates random programs from them and, after every step, compares the system with a model simple enough to be obviously right. For an event queue, the model is a list and <code>min()</code>:</p>
+    <div class="code-block">
+        <div class="code-header">snippets/t06/stateful/test_event_queue_stateful.py <a class="src-link" href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit/blob/main/snippets/t06/stateful/test_event_queue_stateful.py">source</a></div>
+        <pre><code><span class="kw">class</span> <span class="type">EventQueueMachine</span>(<span class="type">RuleBasedStateMachine</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        <span class="fn">super</span>().<span class="fn">__init__</span>()
+        self.q = <span class="type">EventQueue</span>(fifo_ties=<span class="type">FIFO</span>)
+        self.model = []          <span class="cm"># (time, priority, insertion order, name): sorted() is the spec</span>
+        self.n = <span class="num">0</span>
+
+    <span class="mac">@rule</span>(dt=st.<span class="fn">integers</span>(<span class="num">0</span>, <span class="num">3</span>), urgent=st.<span class="fn">booleans</span>())
+    <span class="kw">def</span> <span class="fn">schedule</span>(self, dt, urgent):
+        prio = <span class="type">URGENT</span> <span class="kw">if</span> urgent <span class="kw">else</span> <span class="type">NORMAL</span>
+        name = f<span class="str">"e{self.n}"</span>
+        self.q.<span class="fn">schedule</span>(self.q.now + dt, name, prio)
+        self.model.<span class="fn">append</span>((self.q.now + dt, prio, self.n, name))
+        self.n += <span class="num">1</span>
+
+    <span class="mac">@precondition</span>(<span class="kw">lambda</span> self: self.model)
+    <span class="mac">@rule</span>()
+    <span class="kw">def</span> <span class="fn">pop</span>(self):
+        want = <span class="fn">min</span>(self.model)
+        self.model.<span class="fn">remove</span>(want)
+        <span class="kw">assert</span> self.q.<span class="fn">pop</span>() == (want[<span class="num">0</span>], want[<span class="num">3</span>])
+
+    <span class="mac">@invariant</span>()
+    <span class="kw">def</span> <span class="fn">sizes_agree</span>(self):
+        <span class="kw">assert</span> <span class="fn">len</span>(self.q) == <span class="fn">len</span>(self.model)
+
+
+<span class="type">TestEventQueue</span> = <span class="type">EventQueueMachine</span>.<span class="type">TestCase</span></code></pre>
+    </div>
+    <p>The queue under test can be switched to a buggy tie-break (newest first among equal times). Hypothesis finds a failing program and shrinks it to this (recorded):</p>
+    <div class="code-block"><div class="code-header">QUEUE_BUG=lifo pytest (recorded in snippets/RESULTS.md)</div><pre><code>state = EventQueueMachine()
+state.schedule(dt=0, urgent=False)
+state.schedule(dt=0, urgent=False)
+state.pop()
+AssertionError: assert (0.0, 'e1') == (0.0, 'e0')</code></pre></div>
+    <p>Read it as a minimal reproduction: two events at the same time, popped in the wrong order. Shrinking is a heuristic, so the reported program is short but not always the shortest possible. The same idea tests a cache, a scheduler or a DRAM bank state machine against a reference model.</p>
+</section>
+
+<section class="slide" id="slide-06">
+    <div class="slide-number">06</div>
+    <h2>Golden Tests and Re-Blessing</h2>
+    <p>A golden (approval) test stores the output of a reference run and fails when today's output differs. It catches silent drift: the change nobody meant to make to a number nobody was watching.</p>
+    <div class="code-block">
+        <div class="code-header">snippets/t06/pytest_demo/conftest.py: a golden fixture with a --bless option <a class="src-link" href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit/blob/main/snippets/t06/pytest_demo/conftest.py">source</a></div>
+        <pre><code><span class="mac">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">small_workload</span>():
+    <span class="str">""</span><span class="str">"A fresh workload per test: simulate() mutates requests, so never share one."</span><span class="str">""</span>
+    <span class="kw">return</span> <span class="fn">poisson_workload</span>(<span class="num">2.0</span>, <span class="num">50</span>, <span class="type">LengthDist</span>(<span class="num">512</span>, <span class="num">0.3</span>), <span class="type">LengthDist</span>(<span class="num">32</span>, <span class="num">0.3</span>), seed=<span class="num">7</span>)
+
+
+<span class="mac">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">golden</span>(request, pytestconfig):
+    <span class="str">""</span><span class="str">"Compare a result with tests/golden/&lt;test name&gt;.json, or rewrite it with --bless."</span><span class="str">""</span>
+    path = request.path.parent / <span class="str">"golden"</span> / f<span class="str">"{request.node.name}.json"</span>
+
+    <span class="kw">def</span> <span class="fn">check</span>(result: dict):
+        <span class="kw">if</span> pytestconfig.<span class="fn">getoption</span>(<span class="str">"bless"</span>) <span class="kw">or</span> <span class="kw">not</span> path.<span class="fn">exists</span>():
+            path.parent.<span class="fn">mkdir</span>(exist_ok=<span class="kw">True</span>)
+            path.<span class="fn">write_text</span>(json.<span class="fn">dumps</span>(result, indent=<span class="num">1</span>, sort_keys=<span class="kw">True</span>))
+            pytest.<span class="fn">skip</span>(f<span class="str">"blessed {path.name}"</span>)
+        <span class="kw">assert</span> result == json.<span class="fn">loads</span>(path.<span class="fn">read_text</span>())
+
+    <span class="kw">return</span> check</code></pre>
+    </div>
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border"><h4>Rules that keep golden files honest</h4><ul>
+            <li><strong>Re-bless deliberately.</strong> <code>pytest --bless</code> rewrites the files; the diff of the golden file goes in the same commit as the model change, and a reviewer reads it.</li>
+            <li><strong>Store what matters</strong>, not everything: summary metrics and a sample of timestamps, so a diff is readable.</li>
+            <li><strong>Decide the tolerance per quantity.</strong> Exact for a deterministic simulator; a tolerance only where the platform's maths library genuinely differs.</li>
+        </ul></div>
+        <div class="diagram-panel accent-border"><h4>Golden files across languages</h4><p>Rust_DES_Kernel's <code>tests/golden.rs</code> replays fourteen Python runs stored as JSON and demands identical timestamps and summaries, so the Rust build checks parity without Python installed. <code>pytests/make_golden.py</code> is its <code>--bless</code>: it regenerates the file from the reference simulator.</p></div>
+    </div>
+    <div class="code-block">
+        <div class="code-header">tests/golden.rs in Rust_DES_Kernel <a class="src-link" href="https://github.com/BrendanJamesLynskey/Rust_DES_Kernel/blob/main/tests/golden.rs">source</a></div>
+        <pre><code>#[test]
+<span class="kw">fn</span> <span class="fn">matches_the_python_simulator_exactly</span>() {
+    <span class="kw">let</span> cases: <span class="type">Vec</span>&lt;<span class="type">Value</span>&gt; = serde_json::<span class="fn">from_str</span>(<span class="mac">include_str!</span>(<span class="str">"fixtures/golden.json"</span>)).<span class="fn">unwrap</span>();
+    <span class="mac">assert!</span>(cases.<span class="fn">len</span>() &gt;= <span class="num">5</span>);
+    <span class="kw">for</span> case <span class="kw">in</span> &amp;cases {
+        <span class="kw">let</span> name = case[<span class="str">"name"</span>].<span class="fn">as_str</span>().<span class="fn">unwrap</span>();
+        <span class="kw">let</span> spec: <span class="type">ConfigSpec</span> = serde_json::<span class="fn">from_value</span>(case[<span class="str">"config"</span>].<span class="fn">clone</span>()).<span class="fn">unwrap</span>();
+        <span class="kw">let</span> rows = case[<span class="str">"rows"</span>].<span class="fn">as_array</span>().<span class="fn">unwrap</span>();
+        <span class="kw">let</span> wl = rows
+            .<span class="fn">iter</span>()
+            .<span class="fn">enumerate</span>()
+            .<span class="fn">map</span>(|(i, r)| {
+                <span class="type">Request</span>::<span class="fn">new</span>(
+                    i,
+                    r[<span class="num">0</span>].<span class="fn">as_f64</span>().<span class="fn">unwrap</span>(),
+                    r[<span class="num">1</span>].<span class="fn">as_i64</span>().<span class="fn">unwrap</span>(),
+                    r[<span class="num">2</span>].<span class="fn">as_i64</span>().<span class="fn">unwrap</span>(),
+                )
+            })
+            .<span class="fn">collect</span>();
+        <span class="kw">let</span> res = <span class="fn">simulate</span>(spec.<span class="fn">build</span>().<span class="fn">unwrap</span>(), wl).<span class="fn">unwrap</span>();
+        <span class="kw">for</span> (r, want) <span class="kw">in</span> res.requests.<span class="fn">iter</span>().<span class="fn">zip</span>(case[<span class="str">"stamps"</span>].<span class="fn">as_array</span>().<span class="fn">unwrap</span>()) {
+            <span class="kw">let</span> got = [
+                r.prefill_start,
+                r.first_token,
+                r.kv_start,
+                r.kv_ready,
+                r.decode_start,
+                r.finish,
+            ];
+            <span class="kw">let</span> want: <span class="type">Vec</span>&lt;<span class="type">Option</span>&lt;f64&gt;&gt; =
+                want.<span class="fn">as_array</span>().<span class="fn">unwrap</span>().<span class="fn">iter</span>().<span class="fn">map</span>(<span class="type">Value</span>::as_f64).<span class="fn">collect</span>();
+            <span class="mac">assert_eq!</span>(got.<span class="fn">to_vec</span>(), want, <span class="str">"{name}: request {}"</span>, r.rid);
+        }
+        <span class="mac">assert_eq!</span>(<span class="fn">summarise</span>(&amp;res), case[<span class="str">"summary"</span>], <span class="str">"{name}: summary differs"</span>);
+    }
+}</code></pre>
+    </div>
+</section>
+
+<section class="slide" id="slide-07">
+    <div class="slide-number">07</div>
+    <h2>Mutation Testing</h2>
+    <p>Mutation testing measures the tests rather than the code. A tool makes small deliberate bugs (<strong>mutants</strong>): <code>&gt;=</code> becomes <code>&gt;</code>, <code>+</code> becomes <code>-</code>, a return value is replaced. It runs the suite against each. A failing suite <strong>kills</strong> the mutant; a passing one lets it <strong>survive</strong>, and each survivor is a bug the tests would not notice. Tools: <a href="https://mutmut.readthedocs.io">mutmut</a> for Python, <a href="https://mutants.rs">cargo-mutants</a> for Rust.</p>
+    <p>A toy, run for real: the roofline step model, tested by three suites of increasing strength.</p>
+    <div class="code-block">
+        <div class="code-header">snippets/t06/mutmut_*/src/roofline/__init__.py <a class="src-link" href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit/blob/main/snippets/t06/mutmut_strong/src/roofline/__init__.py">source</a></div>
+        <pre><code><span class="kw">def</span> <span class="fn">step_time</span>(flops, nbytes, peak_flops, bandwidth, overhead=<span class="num">0.5e-3</span>):
+    <span class="str">""</span><span class="str">"Seconds for one step, and which roof bounds it."</span><span class="str">""</span>
+    tc = flops / peak_flops
+    tm = nbytes / bandwidth
+    <span class="kw">if</span> tc &gt;= tm:
+        <span class="kw">return</span> tc + overhead, <span class="str">"compute"</span>
+    <span class="kw">return</span> tm + overhead, <span class="str">"memory"</span></code></pre>
+    </div>
+    <div class="table-wrap"><table>
+<thead><tr><th>Test suite</th><th>Tests</th><th>Line + branch coverage</th><th>Mutants killed</th><th>Survived</th><th>Mutation score</th></tr></thead>
+<tbody>
+<tr><td>weak</td><td>1</td><td>75%</td><td>5</td><td>7</td><td>42%</td></tr>
+<tr><td>medium</td><td>2</td><td>100%</td><td>8</td><td>4</td><td>67%</td></tr>
+<tr><td>strong</td><td>5</td><td>100%</td><td>12</td><td>0</td><td>100%</td></tr>
+</tbody></table></div>
+    <p class="src">Source: <a href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit/blob/main/snippets/RESULTS.md">snippets/RESULTS.md</a> in _simeng_build</p>
+    <div class="code-block"><div class="code-header">The four mutants that survive the "medium" suite, which has 100% line and branch coverage</div><pre><code>-def step_time(flops, nbytes, peak_flops, bandwidth, overhead=0.5e-3):
++def step_time(flops, nbytes, peak_flops, bandwidth, overhead=1.0005):
+
+-    if tc &gt;= tm:
++    if tc &gt; tm:
+
+-        return tc + overhead, "compute"
++        return tc - overhead, "compute"
+
+-    return tm + overhead, "memory"
++    return tm - overhead, "memory"</code></pre></div>
+    <p>The medium suite runs every line and both branches, yet it only checks <em>which</em> roof bounds the step, never <em>how long</em> the step takes, so four bugs in the timing survive. Applied to Rust_DES_Kernel, cargo-mutants found the same pattern in places that matter (slide 09).</p>
+</section>
+
+<section class="slide" id="slide-08">
+    <div class="slide-number">08</div>
+    <h2>Interactive: Mutation Score versus Coverage</h2>
+    <p>The same function and the same twelve mutants that mutmut generated (slide 07). Tick tests to build a suite; the page runs every mutant against it, live, and reports coverage alongside the mutation score. The presets reproduce the three recorded suites.</p>
+    <div class="control-panel">
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem">
+            <button class="btn" data-preset="weak">Weak suite</button>
+            <button class="btn" data-preset="medium">Medium suite</button>
+            <button class="btn" data-preset="strong">Strong suite</button>
+            <button class="btn" data-preset="none">Clear</button>
+        </div>
+        <div class="mut-grid" id="mt-tests"></div>
+        <div class="metric-grid" id="mt-m" style="margin-top:0.75rem"></div>
+        <div class="result-box mut-list" id="mt-list"></div>
+    </div>
+    <script>
+    (function () {
+        const $ = id => document.getElementById(id);
+        // Python semantics that matter here: comparing None with a float raises TypeError.
+        const cmpGE = (a, b) => { if (a === null || b === null) throw new TypeError('None >= float'); return a >= b; };
+        const cmpGT = (a, b) => { if (a === null || b === null) throw new TypeError('None > float'); return a > b; };
+        const add = (a, b) => { if (a === null) throw new TypeError('None + float'); return a + b; };
+        // The original and mutmut's twelve mutants (recorded in snippets/RESULTS.md).
+        function make(m) {
+            return function (flops, nbytes, peak, bw, overhead) {
+                if (overhead === undefined) overhead = m === 1 ? 1.0005 : 0.5e-3;
+                const tc = m === 2 ? null : m === 3 ? flops * peak : flops / peak;
+                const tm = m === 4 ? null : m === 5 ? nbytes * bw : nbytes / bw;
+                if ((m === 6 ? cmpGT : cmpGE)(tc, tm)) {
+                    return [m === 7 ? tc - overhead : add(tc, overhead), m === 8 ? 'XXcomputeXX' : m === 9 ? 'COMPUTE' : 'compute'];
+                }
+                return [m === 10 ? tm - overhead : add(tm, overhead), m === 11 ? 'XXmemoryXX' : m === 12 ? 'MEMORY' : 'memory'];
+            };
+        }
+        const MUT = ['overhead default 0.5e-3 -> 1.0005', 'tc = None', 'tc = flops * peak_flops', 'tm = None', 'tm = nbytes * bandwidth',
+                     'tc >= tm -> tc > tm', 'tc + overhead -> tc - overhead', '"compute" -> "XXcomputeXX"', '"compute" -> "COMPUTE"',
+                     'tm + overhead -> tm - overhead', '"memory" -> "XXmemoryXX"', '"memory" -> "MEMORY"'];
+        const eq = (a, b) => a[0] === b[0] && a[1] === b[1];
+        // Each test: [label, suite, function(step_time) -> passes?, branch it executes].
+        const TESTS = [
+            ['big matmul is compute-bound, t > 0', 'weak', f => { const r = f(1e15, 1e9, 1e15, 1e12); return r[1] === 'compute' && r[0] > 0; }, 'c'],
+            ['big matmul is compute-bound (label only)', 'medium', f => f(1e15, 1e9, 1e15, 1e12)[1] === 'compute', 'c'],
+            ['small-batch decode is memory-bound (label only)', 'medium', f => f(1e9, 1e12, 1e15, 1e12)[1] === 'memory', 'm'],
+            ['compute-bound time is flops/peak + overhead', 'strong', f => eq(f(2e15, 1e9, 1e15, 1e12), [2.0 + 0.5e-3, 'compute']), 'c'],
+            ['memory-bound time is bytes/bandwidth + overhead', 'strong', f => eq(f(1e9, 3e12, 1e15, 1e12), [3.0 + 0.5e-3, 'memory']), 'm'],
+            ['a tie counts as compute-bound', 'strong', f => f(1e15, 1e12, 1e15, 1e12)[1] === 'compute', 'c'],
+            ['overhead is added once', 'strong', f => eq(f(0, 0, 1e15, 1e12, 0.25), [0.25, 'compute']), 'c'],
+            ['rates divide, not multiply', 'strong', f => Math.abs(f(4e15, 0, 2e15, 1e12, 0.0)[0] - 2.0) <= 2.0 * 1e-6, 'c'],
+        ];
+        const passes = (t, m) => { try { return t[2](make(m)); } catch (e) { return false; } };
+        $('mt-tests').innerHTML = TESTS.map((t, i) => `<label><input type="checkbox" id="mt-${i}"> <span>${t[0]} <span class="line-label">(${t[1]})</span></span></label>`).join('');
+        function update() {
+            const on = TESTS.filter((t, i) => $('mt-' + i).checked);
+            const bad = on.filter(t => !passes(t, 0));
+            const killed = MUT.map((_, k) => on.some(t => !passes(t, k + 1)));
+            const branches = new Set(on.map(t => t[3]));
+            // 6 statements: def, tc, tm, if, return-compute, return-memory (the def line always runs)
+            const lines = on.length ? 4 + (branches.has('c') ? 1 : 0) + (branches.has('m') ? 1 : 0) : 0;
+            const nk = killed.filter(Boolean).length;
+            const cell = (l, v) => `<div class="metric"><div class="metric-label">${l}</div><div class="metric-value">${v}</div></div>`;
+            $('mt-m').innerHTML = cell('Tests', on.length) + cell('Line coverage', on.length ? Math.round(100 * lines / 6) + '%' : '0%')
+                + cell('Branch coverage', Math.round(50 * branches.size) + '%') + cell('Mutation score', on.length ? Math.round(100 * nk / 12) + '% (' + nk + '/12)' : '0/12');
+            $('mt-list').innerHTML = (bad.length ? '<span class="survived">a selected test fails on the original code</span><br>' : '')
+                + MUT.map((d, k) => `<span class="${killed[k] ? 'killed' : 'survived'}">${killed[k] ? 'killed  ' : 'survived'}</span>  #${k + 1}  ${d}`).join('<br>');
+        }
+        TESTS.forEach((t, i) => $('mt-' + i).addEventListener('change', update));
+        document.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => {
+            TESTS.forEach((t, i) => $('mt-' + i).checked = t[1] === b.dataset.preset);
+            update();
+        }));
+        document.querySelector('[data-preset="medium"]').click();
+    })();
+    </script>
+    <p>Things to try: the weak suite covers 5 of 6 lines and kills 5 mutants; add the two strong timing tests and watch the score jump while coverage barely moves; find the single test that kills mutant #6 (the tie).</p>
+</section>
+
+<section class="slide" id="slide-09">
+    <div class="slide-number">09</div>
+    <h2>Coverage, and What It Does Not Tell You</h2>
+    <p>Coverage measures what the tests <em>execute</em>: lines, branches, or regions (<code>cargo llvm-cov</code>'s unit). It is cheap, and a low number is a real warning. A high number is not proof, because executing a line is not checking its result. Rust_DES_Kernel's final numbers:</p>
+    <div class="table-wrap"><table>
+<thead><tr><th>File</th><th>Lines</th><th>Regions</th><th>Functions</th></tr></thead>
+<tbody>
+<tr><td><code>src/bin/disagg-rs.rs</code></td><td>88.9%</td><td>65.5%</td><td>69.2%</td></tr>
+<tr><td><code>src/disagg/engine.rs</code></td><td>98.5%</td><td>97.2%</td><td>95.2%</td></tr>
+<tr><td><code>src/disagg/hardware.rs</code></td><td>97.3%</td><td>98.9%</td><td>100.0%</td></tr>
+<tr><td><code>src/disagg/metrics.rs</code></td><td>98.0%</td><td>97.1%</td><td>97.1%</td></tr>
+<tr><td><code>src/disagg/workload.rs</code></td><td>100.0%</td><td>100.0%</td><td>100.0%</td></tr>
+<tr><td><code>src/kernel.rs</code></td><td>97.2%</td><td>98.3%</td><td>95.0%</td></tr>
+<tr><td><code>src/pymath.rs</code></td><td>97.6%</td><td>97.1%</td><td>100.0%</td></tr>
+<tr><td><code>src/pyrand.rs</code></td><td>100.0%</td><td>100.0%</td><td>100.0%</td></tr>
+<tr><td><code>src/queueing.rs</code></td><td>100.0%</td><td>100.0%</td><td>100.0%</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>97.5%</strong></td><td><strong>94.6%</strong></td><td><strong>95.2%</strong></td></tr>
+</tbody></table></div>
+    <p class="src">Source: <a href="https://github.com/BrendanJamesLynskey/Rust_DES_Kernel/blob/main/examples/results.md">examples/results.md</a> in Rust_DES_Kernel</p>
+    <p>Getting there took three rounds of cargo-mutants, each time writing tests for the survivors:</p>
+    <div class="table-wrap"><table>
+        <thead><tr><th>Round</th><th>What the survivors showed</th><th>Tests added</th></tr></thead>
+        <tbody>
+            <tr><td>1 (four files)</td><td><code>fsum</code>'s final rounding correction and floor division's sign fix-ups ran under test but no result was checked: 42 survivors in <code>pymath.rs</code> alone</td><td>1,416 cases computed by CPython itself; the kernel's equality test; a tight-KV golden case with rejections</td></tr>
+            <tr><td>2 (whole crate)</td><td>The A100, optical and 8B presets, three links and several power-cap branches were only exercised by the Python differential suite; the Rust workload generator was never checked from Rust; the M/D/1 test used a service time of 1 s, so <code>*</code> and <code>/</code> by it were indistinguishable</td><td>Golden cases for every preset, link and power-cap mode; four Python-generated workloads; M/D/1 at 2.5 s</td></tr>
+            <tr><td>3</td><td>A mutant that made the M/D/1 theory <em>negative</em> passed: the test divided by the theory, and a negative denominator makes every relative error look small</td><td>Assert the theory is positive</td></tr>
+        </tbody>
+    </table></div>
+    <div class="table-wrap"><table>
+<thead><tr><th>File</th><th>Mutants</th><th>Caught</th><th>Missed</th><th>Timeout</th><th>Unviable</th><th>Score (caught / (caught + missed))</th></tr></thead>
+<tbody>
+<tr><td><code>src/bin/disagg-rs.rs</code></td><td>4</td><td>3</td><td>0</td><td>0</td><td>1</td><td>100%</td></tr>
+<tr><td><code>src/disagg/engine.rs</code></td><td>183</td><td>161</td><td>14</td><td>6</td><td>2</td><td>92%</td></tr>
+<tr><td><code>src/disagg/hardware.rs</code></td><td>286</td><td>238</td><td>13</td><td>0</td><td>35</td><td>95%</td></tr>
+<tr><td><code>src/disagg/metrics.rs</code></td><td>86</td><td>83</td><td>3</td><td>0</td><td>0</td><td>97%</td></tr>
+<tr><td><code>src/disagg/workload.rs</code></td><td>50</td><td>49</td><td>0</td><td>0</td><td>1</td><td>100%</td></tr>
+<tr><td><code>src/kernel.rs</code></td><td>26</td><td>23</td><td>0</td><td>0</td><td>3</td><td>100%</td></tr>
+<tr><td><code>src/pymath.rs</code></td><td>99</td><td>88</td><td>10</td><td>1</td><td>0</td><td>90%</td></tr>
+<tr><td><code>src/pyrand.rs</code></td><td>129</td><td>106</td><td>1</td><td>18</td><td>4</td><td>99%</td></tr>
+<tr><td><code>src/queueing.rs</code></td><td>38</td><td>35</td><td>3</td><td>0</td><td>0</td><td>92%</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>901</strong></td><td><strong>786</strong></td><td><strong>44</strong></td><td><strong>25</strong></td><td><strong>46</strong></td><td><strong>95%</strong></td></tr>
+</tbody></table></div>
+    <p class="src">Source: <a href="https://github.com/BrendanJamesLynskey/Rust_DES_Kernel/blob/main/examples/results.md">examples/results.md</a> in Rust_DES_Kernel</p>
+    <p>The score rose from 89% after the first full run to 95%; the per-round tables are in <code>examples/results.md</code>. Most of the 44 that remain are worth reading, not fixing:</p>
+    <ul>
+        <li><strong>Equivalent mutants</strong> change the code but not its behaviour: <code>|</code> becomes <code>^</code> on two bit masks that never overlap; <code>a / b</code> becomes <code>a * b</code> where only the sign is used; the explicit stop event is deleted, but the event list drains at the same instant anyway. No test can kill these.</li>
+        <li><strong>Boundary mutants</strong> (<code>&gt;</code> to <code>&gt;=</code>) on float comparisons that never tie exactly in practice. Killing them means constructing exact ties; worth it only where a tie is plausible.</li>
+        <li><strong>MC/DC</strong> (modified condition/decision coverage), which DO-178C requires for the most critical avionics software, demands that each condition be shown to affect its decision independently. It is a stricter structural criterion, but it still measures what runs, not whether results are checked.</li>
+    </ul>
+</section>
+
+<section class="slide" id="slide-10">
+    <div class="slide-number">10</div>
+    <h2>GoogleTest for C++ Models</h2>
+    <p>When a model's core is C++ (SystemC, gem5-style simulators; deck 03 of this series, <a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/">planned</a>), <a href="https://google.github.io/googletest/">GoogleTest</a> is the usual framework. The same event-queue contract as deck 01 and slide 05, in C++:</p>
+    <div class="code-block">
+        <div class="code-header">snippets/t06/gtest/test_event_queue.cpp: fixtures, ASSERT vs EXPECT, value-parameterised tests <a class="src-link" href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit/blob/main/snippets/t06/gtest/test_event_queue.cpp">source</a></div>
+        <pre><code><span class="cm">// A fixture: SetUp() runs before every TEST_F that names it.</span>
+<span class="kw">class</span> <span class="type">TiedQueue</span> : <span class="kw">public</span> ::testing::<span class="type">Test</span> {
+<span class="kw">protected</span>:
+    <span class="kw">void</span> <span class="type">SetUp</span>() <span class="kw">override</span> {
+        q.<span class="fn">schedule</span>(<span class="num">1.0</span>, <span class="str">"n1"</span>);
+        q.<span class="fn">schedule</span>(<span class="num">1.0</span>, <span class="str">"n2"</span>);
+        q.<span class="fn">schedule</span>(<span class="num">1.0</span>, <span class="str">"urgent"</span>, <span class="type">Priority</span>::<span class="type">Urgent</span>);
+    }
+    <span class="type">EventQueue</span> q;
+};
+
+<span class="type">TEST_F</span>(<span class="type">TiedQueue</span>, <span class="type">UrgentBeatsNormalAtTheSameTime</span>) {
+    <span class="type">EXPECT_EQ</span>(q.<span class="fn">pop</span>().name, <span class="str">"urgent"</span>);
+}
+
+<span class="type">TEST_F</span>(<span class="type">TiedQueue</span>, <span class="type">EqualKeysAreFirstInFirstOut</span>) {
+    q.<span class="fn">pop</span>();
+    <span class="type">ASSERT_EQ</span>(q.<span class="fn">size</span>(), 2u);              <span class="cm">// ASSERT stops this test if it fails; EXPECT carries on</span>
+    <span class="type">EXPECT_EQ</span>(q.<span class="fn">pop</span>().name, <span class="str">"n1"</span>);
+    <span class="type">EXPECT_EQ</span>(q.<span class="fn">pop</span>().name, <span class="str">"n2"</span>);
+}
+
+<span class="cm">// A value-parameterised test: one body, many inputs.</span>
+<span class="kw">class</span> <span class="type">ClockNeverGoesBack</span> : <span class="kw">public</span> ::testing::<span class="type">TestWithParam</span>&lt;std::tuple&lt;<span class="kw">double</span>, <span class="kw">double</span>, <span class="kw">double</span>&gt;&gt; {};
+
+<span class="type">TEST_P</span>(<span class="type">ClockNeverGoesBack</span>, <span class="type">AcrossInsertionOrders</span>) {
+    <span class="kw">auto</span> [a, b, c] = <span class="type">GetParam</span>();
+    <span class="type">EventQueue</span> q;
+    <span class="kw">for</span> (<span class="kw">double</span> t : {a, b, c}) q.<span class="fn">schedule</span>(t, <span class="str">"e"</span>);
+    <span class="kw">double</span> last = -<span class="num">1.0</span>;
+    <span class="kw">while</span> (q.<span class="fn">size</span>()) {
+        <span class="kw">double</span> t = q.<span class="fn">pop</span>().time;
+        <span class="type">EXPECT_GE</span>(t, last);
+        last = t;
+    }
+}
+
+<span class="type">INSTANTIATE_TEST_SUITE_P</span>(<span class="type">Orders</span>, <span class="type">ClockNeverGoesBack</span>,</code></pre>
+    </div>
+    <div class="chart-pair">
+        <div><div class="code-block">
+        <div class="code-header">death tests check that an invariant aborts <a class="src-link" href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit/blob/main/snippets/t06/gtest/test_event_queue.cpp">source</a></div>
+        <pre><code><span class="cm">// A death test: the assertion must abort the process (debug builds only).</span>
+<span class="type">TEST</span>(<span class="type">EventQueueDeathTest</span>, <span class="type">PopFromEmptyAborts</span>) {
+    <span class="type">EventQueue</span> q;
+    <span class="type">EXPECT_DEATH</span>(q.<span class="fn">pop</span>(), <span class="str">"empty queue"</span>);
+}</code></pre>
+    </div></div>
+        <div><div class="code-block">
+        <div class="code-header">CMakeLists.txt: fetch GoogleTest; build with sanitizers <a class="src-link" href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit/blob/main/snippets/t06/gtest/CMakeLists.txt">source</a></div>
+        <pre><code><span class="fn">include</span>(FetchContent)
+<span class="fn">FetchContent_Declare</span>(googletest
+  URL https://github.com/google/googletest/archive/refs/tags/v1.<span class="num">18.0</span>.tar.gz
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
+<span class="fn">FetchContent_MakeAvailable</span>(googletest)
+
+<span class="fn">add_executable</span>(test_event_queue test_event_queue.cpp)
+<span class="fn">target_compile_options</span>(test_event_queue PRIVATE -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer)
+<span class="fn">target_link_options</span>(test_event_queue PRIVATE -fsanitize=address,undefined)
+<span class="fn">target_link_libraries</span>(test_event_queue GTest::gtest_main)
+
+<span class="fn">include</span>(GoogleTest)
+<span class="fn">gtest_discover_tests</span>(test_event_queue)</code></pre>
+    </div></div>
+    </div>
+    <p>Recorded result: <code>[==========] 9 tests from 4 test suites ran. (1155 ms total)</code>  <code>[  PASSED  ] 9 tests.</code> Building tests with AddressSanitizer and UndefinedBehaviorSanitizer turns memory errors and undefined behaviour into test failures, which is where most C++ model bugs hide. <code>gtest_discover_tests</code> registers each test with CTest, so <code>ctest --output-junit</code> feeds CI.</p>
+</section>
+
+<section class="slide" id="slide-11">
+    <div class="slide-number">11</div>
+    <h2>cargo test and proptest</h2>
+    <p>Rust's test harness is built in: <code>#[test]</code> functions in a module (they see private items) or in <code>tests/</code> (they see the public API, as a user would). <a href="https://docs.rs/proptest">proptest</a> brings Hypothesis-style generation and shrinking. From Rust_DES_Kernel:</p>
+    <div class="code-block">
+        <div class="code-header">tests/props.rs: a strategy that generates whole configurations <a class="src-link" href="https://github.com/BrendanJamesLynskey/Rust_DES_Kernel/blob/main/tests/props.rs">source</a></div>
+        <pre><code><span class="kw">fn</span> <span class="fn">spec</span>() -&gt; <span class="kw">impl</span> <span class="type">Strategy</span>&lt;<span class="type">Value</span> = <span class="type">ConfigSpec</span>&gt; {
+    (
+        prop::bool::<span class="type">ANY</span>,
+        <span class="num">1usize</span>..<span class="num">4</span>,
+        <span class="num">1usize</span>..<span class="num">4</span>,
+        prop::sample::<span class="fn">select</span>(<span class="mac">vec!</span>[<span class="str">"ib-ndr"</span>, <span class="str">"eth-25g"</span>, <span class="str">"nvlink4"</span>, <span class="str">"pcie5"</span>, <span class="str">"eth-100g"</span>]),
+        <span class="num">1usize</span>..<span class="num">4</span>,
+        prop::option::<span class="fn">of</span>(<span class="num">200.0f64</span>..<span class="num">700.0</span>),
+        prop::bool::<span class="type">ANY</span>,
+        prop::sample::<span class="fn">select</span>(<span class="mac">vec!</span>[<span class="num">8usize</span>, <span class="num">64</span>, <span class="num">256</span>]),
+    )
+        .<span class="fn">prop_map</span>(|(colo, a, b, link, ch, cap, dvfs, maxb)| <span class="type">ConfigSpec</span> {
+            mode: <span class="kw">if</span> colo { <span class="str">"colocated"</span> } <span class="kw">else</span> { <span class="str">"disagg"</span> }.<span class="fn">into</span>(),
+            n_prefill: a,
+            n_decode: b,
+            n_colocated: a,
+            link: link.<span class="fn">into</span>(),
+            link_channels: ch,
+            power_cap_w: cap,
+            dvfs,
+            max_decode_batch: maxb,
+            ..<span class="type">Default</span>::<span class="fn">default</span>()
+        })
+}</code></pre>
+    </div>
+    <div class="code-block">
+        <div class="code-header">tests/props.rs: the properties <a class="src-link" href="https://github.com/BrendanJamesLynskey/Rust_DES_Kernel/blob/main/tests/props.rs">source</a></div>
+        <pre><code><span class="cm">// Every request either finishes or is rejected, never both.</span>
+<span class="kw">let</span> finished = res.requests.<span class="fn">iter</span>().<span class="fn">filter</span>(|r| r.finish.<span class="fn">is_some</span>()).<span class="fn">count</span>();
+<span class="mac">prop_assert_eq!</span>(finished + res.rejected.<span class="fn">len</span>(), res.requests.<span class="fn">len</span>());
+
+<span class="kw">for</span> r <span class="kw">in</span> res.requests.<span class="fn">iter</span>().<span class="fn">filter</span>(|r| r.finish.<span class="fn">is_some</span>()) {
+    <span class="cm">// Timestamps never go backwards along a request's path.</span>
+    <span class="kw">let</span> path: <span class="type">Vec</span>&lt;f64&gt; = [<span class="type">Some</span>(r.arrival), r.prefill_start, r.first_token, r.kv_start,
+                          r.kv_ready, r.decode_start, r.finish].<span class="fn">into_iter</span>().<span class="fn">flatten</span>().<span class="fn">collect</span>();
+    <span class="mac">prop_assert!</span>(path.<span class="fn">windows</span>(<span class="num">2</span>).<span class="fn">all</span>(|w| w[<span class="num">0</span>] &lt;= w[<span class="num">1</span>]), <span class="str">"{:?}"</span>, path);
+    <span class="cm">// One inter-token latency per token after the first, all positive.</span>
+    <span class="mac">prop_assert_eq!</span>(r.itls.<span class="fn">len</span>() <span class="kw">as</span> i64, (r.output_len - <span class="num">1</span>).<span class="fn">max</span>(<span class="num">0</span>));
+    <span class="mac">prop_assert!</span>(r.itls.<span class="fn">iter</span>().<span class="fn">all</span>(|&amp;x| x &gt; <span class="num">0.0</span>));
+    <span class="cm">// Stages partition end-to-end latency.</span>
+    <span class="kw">let</span> sum: f64 = r.<span class="fn">stages</span>().<span class="fn">iter</span>().<span class="fn">sum</span>();
+    <span class="mac">prop_assert!</span>((sum - r.<span class="fn">e2e</span>()).<span class="fn">abs</span>() &lt;= <span class="num">1e-9</span> * r.<span class="fn">e2e</span>().<span class="fn">max</span>(<span class="num">1.0</span>));</code></pre>
+    </div>
+    <ul>
+        <li><strong>Regressions are kept.</strong> When proptest finds a failure it writes the seed to <code>proptest-regressions/</code>; commit that directory and the case is replayed first, forever.</li>
+        <li><strong>Strategies compose</strong>: tuples, <code>prop_map</code>, <code>prop::option::of</code>, <code>prop::sample::select</code>, ranges of floats and integers.</li>
+        <li>Deck 01 lists every test file in the crate and what it checks (<a href="https://brendanjameslynskey.github.io/SimEng_01_Rust_for_Simulation_Engineers/#slide-12">deck 01, slide 12</a>).</li>
+    </ul>
+    <div class="table-wrap"><table>
+<thead><tr><th>Test target</th><th>Tests</th><th>What it checks</th></tr></thead>
+<tbody>
+<tr><td><code>unittests src/lib.rs</code></td><td>17</td><td>Unit tests inside the modules</td></tr>
+<tr><td><code>tests/cli.rs</code></td><td>4</td><td>The disagg-rs binary end to end</td></tr>
+<tr><td><code>tests/golden.rs</code></td><td>2</td><td>Recorded Python runs replayed bit for bit</td></tr>
+<tr><td><code>tests/kernel.rs</code></td><td>2</td><td>M/D/1 against theory; ordering property</td></tr>
+<tr><td><code>tests/props.rs</code></td><td>2</td><td>proptest invariants over random configurations</td></tr>
+<tr><td><code>tests/pymath.rs</code></td><td>2</td><td>fsum and floor division against CPython</td></tr>
+<tr><td><code>pytests/</code> (pytest + Hypothesis)</td><td>17</td><td>Differential tests against the live Python simulator</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>46</strong></td><td></td></tr>
+</tbody></table></div>
+    <p class="src">Source: <a href="https://github.com/BrendanJamesLynskey/Rust_DES_Kernel/blob/main/examples/results.md">examples/results.md</a> in Rust_DES_Kernel</p>
+</section>
+
+<section class="slide" id="slide-12">
+    <div class="slide-number">12</div>
+    <h2>cocotb: Python Testbenches for RTL</h2>
+    <p><a href="https://www.cocotb.org">cocotb</a> drives an HDL simulator from Python coroutines, so the simulator's Python model can serve as the RTL's scoreboard. This is the bridge between a performance model and pre-tape-out verification (deck 05 of this series, <a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/">planned</a>, builds it out for an NTT pipeline). A modular adder, the smallest piece of an NTT butterfly:</p>
+    <div class="code-block">
+        <div class="code-header">snippets/t06/cocotb/test_mod_add.py: golden model, constrained random stimulus, functional coverage <a class="src-link" href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit/blob/main/snippets/t06/cocotb/test_mod_add.py">source</a></div>
+        <pre><code><span class="kw">def</span> <span class="fn">golden</span>(a: int, b: int) -&gt; int:
+    <span class="str">""</span><span class="str">"The reference model: what the hardware must compute."</span><span class="str">""</span>
+    <span class="kw">return</span> (a + b) % <span class="type">Q</span>
+
+
+<span class="kw">def</span> <span class="fn">stimulus</span>(rng: random.<span class="type">Random</span>, n: int):
+    <span class="str">""</span><span class="str">"Constrained random: mostly uniform, plus the corners a uniform draw rarely hits."</span><span class="str">""</span>
+    corners = [(<span class="num">0</span>, <span class="num">0</span>), (<span class="type">Q</span> - <span class="num">1</span>, <span class="num">0</span>), (<span class="type">Q</span> - <span class="num">1</span>, <span class="num">1</span>), (<span class="type">Q</span> - <span class="num">1</span>, <span class="type">Q</span> - <span class="num">1</span>), (<span class="type">Q</span> // <span class="num">2</span>, <span class="type">Q</span> - <span class="type">Q</span> // <span class="num">2</span>)]
+    <span class="kw">yield</span> <span class="kw">from</span> corners
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n):
+        <span class="kw">yield</span> rng.<span class="fn">randrange</span>(<span class="type">Q</span>), rng.<span class="fn">randrange</span>(<span class="type">Q</span>)
+
+
+<span class="mac">@cocotb.test</span>()
+<span class="kw">async</span> <span class="kw">def</span> <span class="fn">matches_golden_model_with_full_coverage</span>(dut):
+    cocotb.<span class="fn">start_soon</span>(<span class="type">Clock</span>(dut.clk, <span class="num">10</span>, unit=<span class="str">"ns"</span>).<span class="fn">start</span>())
+    dut.rst_n.value, dut.in_valid.value = <span class="num">0</span>, <span class="num">0</span>
+    <span class="kw">await</span> <span class="type">RisingEdge</span>(dut.clk)
+    dut.rst_n.value = <span class="num">1</span>
+
+    bins = {<span class="str">"no wrap"</span>: <span class="num">0</span>, <span class="str">"wrap"</span>: <span class="num">0</span>, <span class="str">"sum == Q (result 0)"</span>: <span class="num">0</span>, <span class="str">"max operands"</span>: <span class="num">0</span>}
+    <span class="kw">for</span> a, b <span class="kw">in</span> <span class="fn">stimulus</span>(random.<span class="type">Random</span>(<span class="num">2026</span>), <span class="num">2000</span>):
+        <span class="kw">await</span> <span class="type">FallingEdge</span>(dut.clk)                      <span class="cm"># drive away from the active edge</span>
+        dut.a.value, dut.b.value, dut.in_valid.value = a, b, <span class="num">1</span>
+        <span class="kw">await</span> <span class="type">RisingEdge</span>(dut.clk)
+        <span class="kw">await</span> <span class="type">ReadOnly</span>()                                <span class="cm"># sample after the register updates</span>
+        <span class="kw">assert</span> dut.out_valid.value == <span class="num">1</span>
+        <span class="kw">assert</span> <span class="fn">int</span>(dut.r.value) == <span class="fn">golden</span>(a, b), f<span class="str">"{a} + {b}: got {int(dut.r.value)}"</span>
+        bins[<span class="str">"wrap"</span> <span class="kw">if</span> a + b &gt;= <span class="type">Q</span> <span class="kw">else</span> <span class="str">"no wrap"</span>] += <span class="num">1</span>
+        bins[<span class="str">"sum == Q (result 0)"</span>] += a + b == <span class="type">Q</span>
+        bins[<span class="str">"max operands"</span>] += a == b == <span class="type">Q</span> - <span class="num">1</span>
+
+    dut._log.<span class="fn">info</span>(<span class="str">"coverage: %s"</span>, bins)
+    <span class="kw">assert</span> <span class="fn">all</span>(bins.<span class="fn">values</span>()), f<span class="str">"coverage hole: {bins}"</span></code></pre>
+    </div>
+    <ul>
+        <li><strong>Timing discipline</strong>: drive on the falling edge, sample after <code>ReadOnly()</code> following the rising edge, so the check sees the registered result.</li>
+        <li><strong>Constrained random plus corners</strong>: uniform operands rarely hit <code>a + b == Q</code> exactly, so the corners are listed explicitly; the coverage bins prove they were exercised.</li>
+        <li><strong>Recorded</strong>: <code>TESTS=1 PASS=1 FAIL=0 SKIP=0</code>; coverage: {'no wrap': 1013, 'wrap': 992, 'sum == Q (result 0)': 2, 'max operands': 1}</li>
+        <li><strong>The test of the test</strong>: changing one comparison in the RTL (<code>&gt;=</code> to <code>&gt;</code>) is caught: Seeded bug (<code>sum &gt;= Q</code> changed to <code>sum &gt; Q</code>): <code>TESTS=1 PASS=0 FAIL=1 SKIP=0</code>, first mismatch <code>65520 + 1: got 65521</code></li>
+    </ul>
+</section>
+
+<section class="slide" id="slide-13">
+    <div class="slide-number">13</div>
+    <h2>Running It All in CI</h2>
+    <p>Tests only protect a model if they run on every change. The frameworks above all speak the same two formats, which is what makes a mixed-language project manageable in one pipeline:</p>
+    <div class="table-wrap"><table>
+        <thead><tr><th>Framework</th><th>JUnit XML</th><th>Coverage</th></tr></thead>
+        <tbody>
+            <tr><td>pytest</td><td><code>--junitxml=report.xml</code></td><td><code>pytest-cov</code>: <code>--cov-report=xml</code> (Cobertura)</td></tr>
+            <tr><td>cargo</td><td><code>cargo nextest</code> with a <code>[profile.ci.junit]</code> section</td><td><code>cargo llvm-cov --cobertura</code></td></tr>
+            <tr><td>GoogleTest</td><td><code>--gtest_output=xml</code>, or <code>ctest --output-junit</code></td><td>gcov / llvm-cov, then gcovr</td></tr>
+            <tr><td>cocotb</td><td><code>results.xml</code>, written by every run</td><td>The simulator's own coverage (Verilator, Questa)</td></tr>
+        </tbody>
+    </table></div>
+    <div class="code-block">
+        <div class="code-header">Jenkinsfile in Rust_DES_Kernel: tests and coverage stages <a class="src-link" href="https://github.com/BrendanJamesLynskey/Rust_DES_Kernel/blob/main/Jenkinsfile">source</a></div>
+        <pre><code><span class="kw">stage</span>(<span class="str">'Rust tests'</span>) {
+    <span class="kw">steps</span> {
+        <span class="kw">sh</span> <span class="str">'cargo nextest run --release --profile ci'</span>
+    }
+}
+
+<span class="kw">stage</span>(<span class="str">'Python differential tests'</span>) {
+    <span class="kw">steps</span> {
+        <span class="kw">sh</span> <span class="str">''</span>'
+            python3 -m venv .venv
+            .venv/bin/pip install -q maturin
+            .venv/bin/maturin develop --release -q -E dev
+            .venv/bin/pytest pytests --junitxml=pytest-junit.xml
+        <span class="str">''</span>'
+    }
+}
+
+<span class="kw">stage</span>(<span class="str">'Coverage'</span>) {
+    <span class="kw">steps</span> {
+        <span class="kw">sh</span> <span class="str">'cargo llvm-cov --release --cobertura --output-path coverage.xml'</span>
+        <span class="fn">recordCoverage</span>(tools: [[parser: <span class="str">'COBERTURA'</span>, pattern: <span class="str">'coverage.xml'</span>]],</code></pre>
+    </div>
+    <ul>
+        <li><strong>Gate on performance too.</strong> Rust_DES_Kernel's pipeline runs criterion and fails the build if any benchmark is more than 25% slower than a stored baseline (<code>ci/perf_gate.py</code>).</li>
+        <li><strong>Treat flaky tests as bugs.</strong> A deterministic simulator should have none; a flaky test usually means shared state, an unseeded random number or a wall-clock dependency.</li>
+        <li>Jenkins itself, run against this repository, is the subject of deck 07 of this series (<a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/">planned</a>); <a href="https://brendanjameslynskey.github.io/InfSim_06_Metrics_Hotspots_Validation/#slide-10">LLM Inference Simulators 06, slide 10</a> has a first sketch.</li>
+    </ul>
+</section>
+
+<section class="slide" id="slide-14">
+    <div class="slide-number">14</div>
+    <h2>What to Take Away</h2>
+    <ul>
+        <li><strong>Map each rung of the ladder to a tool</strong>: unit and analytic tests in pytest, cargo test or GoogleTest; properties in Hypothesis or proptest; sequences in stateful tests; drift in golden files; agreement in differential tests.</li>
+        <li><strong>pytest's power is in fixtures, parametrize and markers</strong>; build fresh mutable inputs for every test.</li>
+        <li><strong>Let the computer find counterexamples</strong>, and keep the shrunk ones as permanent regressions.</li>
+        <li><strong>Re-bless golden files deliberately</strong>, with the diff reviewed alongside the model change.</li>
+        <li><strong>Coverage says what ran; mutation testing says what was checked.</strong> 100% coverage with a 67% mutation score is a real outcome, measured on slide 07.</li>
+        <li><strong>Emit JUnit XML and coverage from every framework</strong>, and gate CI on tests, coverage and performance.</li>
+    </ul>
+    <ul class="res-list">
+        <li><a href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit/tree/main/snippets">The examples in this deck</a><span class="what">Every snippet, runnable, with the script that records their outputs.</span></li>
+        <li><a href="https://github.com/BrendanJamesLynskey/Rust_DES_Kernel">Rust_DES_Kernel</a><span class="what">Golden, differential, property-based and mutation testing on a real port.</span></li>
+        <li><a href="https://github.com/BrendanJamesLynskey/Interview_Software_Testing">Interview_Software_Testing</a><span class="what">Interview questions on testing strategy and techniques.</span></li>
+        <li><a href="https://brendanjameslynskey.github.io/InfSim_06_Metrics_Hotspots_Validation/">LLM Inference Simulators 06</a><span class="what">The verification ladder, statistics and validation for simulators.</span></li>
+        <li><a href="https://docs.pytest.org">pytest</a>, <a href="https://hypothesis.readthedocs.io">Hypothesis</a>, <a href="https://google.github.io/googletest/">GoogleTest</a>, <a href="https://docs.cocotb.org">cocotb</a> documentation<span class="what">Check versions: the outputs here are from pytest 9, Hypothesis 6, cocotb 2 and GoogleTest 1.18.</span></li>
+    </ul>
+</section>
+
+<!-- ════════════════════════════════════ Footer ════════════════════════════════════ -->
+<footer class="footer">
+    <p>Part of the <a href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit">Simulation Engineering Toolkit series</a> &middot; <a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#glossary">glossary: every concept and where it is explained</a> &middot; code: <a href="https://github.com/BrendanJamesLynskey/Rust_DES_Kernel">Rust_DES_Kernel</a> &middot; <a href="https://github.com/BrendanJamesLynskey/Disaggregated_Inference_Sim">Disaggregated_Inference_Sim</a></p>
+    <p style="margin-top: 0.5rem; font-size: 0.8rem;"><a href="https://brendanjameslynskey.github.io/SimEng_02_Rust_Python_PyO3/">&larr; 02 Rust and Python: Porting a Simulator Core with PyO3</a></p>
+    <p style="margin-top: 0.5rem; font-size: 0.8rem;">Interview questions: <a href="https://github.com/BrendanJamesLynskey/Interview_Software_Testing">Interview_Software_Testing</a> &middot; sister series: <a href="https://github.com/BrendanJamesLynskey/LLM_Hub_Inference_Simulators">LLM Inference Simulators</a> &middot; <a href="https://github.com/BrendanJamesLynskey/FHE_Hub_Accelerator_Simulators">FHE Accelerator Simulators</a></p>
+</footer>
+
+<script>
+    // Smooth scroll for TOC links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    // Subtle fade-in on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.slide').forEach(slide => {
+        slide.style.opacity = '0';
+        slide.style.transform = 'translateY(30px)';
+        slide.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(slide);
+    });
+</script>
+
+</body>
+</html>
