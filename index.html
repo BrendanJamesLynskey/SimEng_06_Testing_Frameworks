@@ -1513,24 +1513,24 @@ AssertionError: assert (0.0, 'e1') == (0.0, 'e0')</code></pre></div>
         <div class="code-header">Jenkinsfile in Rust_DES_Kernel: tests and coverage stages <a class="src-link" href="https://github.com/BrendanJamesLynskey/Rust_DES_Kernel/blob/main/Jenkinsfile">source</a></div>
         <pre><code><span class="kw">stage</span>(<span class="str">'Rust tests'</span>) {
     <span class="kw">steps</span> {
-        <span class="kw">sh</span> <span class="str">'cargo nextest run --release --profile ci'</span>
+        <span class="kw">sh</span>(env.WITH_CARGO + <span class="str">'cargo nextest run --release --profile ci'</span>)
     }
 }
 
 <span class="kw">stage</span>(<span class="str">'Python differential tests'</span>) {
     <span class="kw">steps</span> {
-        <span class="kw">sh</span> <span class="str">''</span>'
+        <span class="kw">sh</span>(env.WITH_CARGO + <span class="str">''</span>'
             python3 -m venv .venv
             .venv/bin/pip install -q maturin
             .venv/bin/maturin develop --release -q -E dev
             .venv/bin/pytest pytests --junitxml=pytest-junit.xml
-        <span class="str">''</span>'
+        <span class="str">''</span>')
     }
 }
 
 <span class="kw">stage</span>(<span class="str">'Coverage'</span>) {
     <span class="kw">steps</span> {
-        <span class="kw">sh</span> <span class="str">'cargo llvm-cov --release --cobertura --output-path coverage.xml'</span>
+        <span class="kw">sh</span>(env.WITH_CARGO + <span class="str">'cargo llvm-cov --release --cobertura --output-path coverage.xml'</span>)
         <span class="cm">// cargo-llvm-cov lists each generic instantiation as its own method, and the</span>
         <span class="cm">// Coverage plugin's Cobertura parser rejects duplicate names: skip them.</span>
         <span class="fn">recordCoverage</span>(tools: [[parser: <span class="str">'COBERTURA'</span>, pattern: <span class="str">'coverage.xml'</span>]],</code></pre>
@@ -1565,7 +1565,7 @@ AssertionError: assert (0.0, 'e1') == (0.0, 'e0')</code></pre></div>
 <!-- ════════════════════════════════════ Footer ════════════════════════════════════ -->
 <footer class="footer">
     <p>Part of the <a href="https://github.com/BrendanJamesLynskey/SimEng_Hub_Toolkit">Simulation Engineering Toolkit series</a> &middot; <a href="https://brendanjameslynskey.github.io/SimEng_Hub_Toolkit/#glossary">glossary: every concept and where it is explained</a> &middot; code: <a href="https://github.com/BrendanJamesLynskey/Rust_DES_Kernel">Rust_DES_Kernel</a> &middot; <a href="https://github.com/BrendanJamesLynskey/Disaggregated_Inference_Sim">Disaggregated_Inference_Sim</a></p>
-    <p style="margin-top: 0.5rem; font-size: 0.8rem;"><a href="https://brendanjameslynskey.github.io/SimEng_05_Verification_Bridge_cocotb/">&larr; 05 Verification Bridge: cocotb, Verilator and Golden Models</a></p>
+    <p style="margin-top: 0.5rem; font-size: 0.8rem;"><a href="https://brendanjameslynskey.github.io/SimEng_05_Verification_Bridge_cocotb/">&larr; 05 Verification Bridge: cocotb, Verilator and Golden Models</a> &nbsp;&middot;&nbsp; <a href="https://brendanjameslynskey.github.io/SimEng_07_Jenkins_for_Simulation_Teams/">07 Jenkins for Hardware and Simulation Teams &rarr;</a></p>
     <p style="margin-top: 0.5rem; font-size: 0.8rem;">Interview questions: <a href="https://github.com/BrendanJamesLynskey/Interview_Software_Testing">Interview_Software_Testing</a> &middot; sister series: <a href="https://github.com/BrendanJamesLynskey/LLM_Hub_Inference_Simulators">LLM Inference Simulators</a> &middot; <a href="https://github.com/BrendanJamesLynskey/FHE_Hub_Accelerator_Simulators">FHE Accelerator Simulators</a></p>
 </footer>
 
