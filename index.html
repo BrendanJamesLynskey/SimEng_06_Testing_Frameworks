@@ -1275,16 +1275,16 @@ AssertionError: assert (0.0, 'e1') == (0.0, 'e0')</code></pre></div>
     <div class="table-wrap"><table>
 <thead><tr><th>File</th><th>Lines</th><th>Regions</th><th>Functions</th></tr></thead>
 <tbody>
-<tr><td><code>src/bin/disagg-rs.rs</code></td><td>88.9%</td><td>65.5%</td><td>69.2%</td></tr>
-<tr><td><code>src/disagg/engine.rs</code></td><td>98.5%</td><td>97.2%</td><td>95.2%</td></tr>
-<tr><td><code>src/disagg/hardware.rs</code></td><td>97.6%</td><td>99.1%</td><td>100.0%</td></tr>
-<tr><td><code>src/disagg/metrics.rs</code></td><td>98.0%</td><td>97.1%</td><td>97.1%</td></tr>
+<tr><td><code>src/bin/disagg-rs.rs</code></td><td>89.8%</td><td>69.1%</td><td>69.2%</td></tr>
+<tr><td><code>src/disagg/engine.rs</code></td><td>97.9%</td><td>96.7%</td><td>92.3%</td></tr>
+<tr><td><code>src/disagg/hardware.rs</code></td><td>99.2%</td><td>99.4%</td><td>100.0%</td></tr>
+<tr><td><code>src/disagg/metrics.rs</code></td><td>97.6%</td><td>97.0%</td><td>97.3%</td></tr>
 <tr><td><code>src/disagg/workload.rs</code></td><td>100.0%</td><td>100.0%</td><td>100.0%</td></tr>
 <tr><td><code>src/kernel.rs</code></td><td>97.2%</td><td>98.3%</td><td>95.0%</td></tr>
 <tr><td><code>src/pymath.rs</code></td><td>97.6%</td><td>97.1%</td><td>100.0%</td></tr>
 <tr><td><code>src/pyrand.rs</code></td><td>100.0%</td><td>100.0%</td><td>100.0%</td></tr>
 <tr><td><code>src/queueing.rs</code></td><td>100.0%</td><td>100.0%</td><td>100.0%</td></tr>
-<tr><td><strong>Total</strong></td><td><strong>97.5%</strong></td><td><strong>94.7%</strong></td><td><strong>95.3%</strong></td></tr>
+<tr><td><strong>Total</strong></td><td><strong>97.6%</strong></td><td><strong>94.9%</strong></td><td><strong>94.5%</strong></td></tr>
 </tbody></table></div>
     <p class="src">Source: <a href="https://github.com/BrendanJamesLynskey/Rust_DES_Kernel/blob/main/examples/results.md">examples/results.md</a> in Rust_DES_Kernel</p>
     <p>Getting there took three rounds of cargo-mutants, each time writing tests for the survivors:</p>
@@ -1450,14 +1450,14 @@ AssertionError: assert (0.0, 'e1') == (0.0, 'e0')</code></pre></div>
     <div class="table-wrap"><table>
 <thead><tr><th>Test target</th><th>Tests</th><th>What it checks</th></tr></thead>
 <tbody>
-<tr><td><code>unittests src/lib.rs</code></td><td>18</td><td>Unit tests inside the modules</td></tr>
-<tr><td><code>tests/cli.rs</code></td><td>4</td><td>The disagg-rs binary end to end</td></tr>
+<tr><td><code>unittests src/lib.rs</code></td><td>22</td><td>Unit tests inside the modules</td></tr>
+<tr><td><code>tests/cli.rs</code></td><td>5</td><td>The disagg-rs binary end to end</td></tr>
 <tr><td><code>tests/golden.rs</code></td><td>2</td><td>Recorded Python runs replayed bit for bit</td></tr>
 <tr><td><code>tests/kernel.rs</code></td><td>2</td><td>M/D/1 against theory; ordering property</td></tr>
 <tr><td><code>tests/props.rs</code></td><td>2</td><td>proptest invariants over random configurations</td></tr>
 <tr><td><code>tests/pymath.rs</code></td><td>2</td><td>fsum and floor division against CPython</td></tr>
-<tr><td><code>pytests/</code> (pytest + Hypothesis)</td><td>17</td><td>Differential tests against the live Python simulator</td></tr>
-<tr><td><strong>Total</strong></td><td><strong>47</strong></td><td></td></tr>
+<tr><td><code>pytests/</code> (pytest + Hypothesis)</td><td>28</td><td>Differential tests against the live Python simulator</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>63</strong></td><td></td></tr>
 </tbody></table></div>
     <p class="src">Source: <a href="https://github.com/BrendanJamesLynskey/Rust_DES_Kernel/blob/main/examples/results.md">examples/results.md</a> in Rust_DES_Kernel</p>
 </section>
